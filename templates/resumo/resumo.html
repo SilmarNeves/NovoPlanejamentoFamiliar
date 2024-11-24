@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-lg">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col">
+            <div class="br-page-title">
+                <h1>Resumo Financeiro</h1>
+            </div>
+            
+            <!-- Filtro de Período -->
+            <div class="br-card mb-3">
+                <div class="card-content">
+                    <form method="get" class="row">
+                        <div class="col-auto">
+                            <div class="br-select">
+                                <label for="mes">Mês</label>
+                                <select id="mes" name="mes">
+                                    {% for m in meses %}
+                                        <option value="{{ m.0 }}" {% if m.0 == mes_selecionado %}selected{% endif %}>
+                                            {{ m.1 }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="br-select">
+                                <label for="ano">Ano</label>
+                                <select id="ano" name="ano">
+                                    {% for ano in anos %}
+                                        <option value="{{ ano }}" {% if ano == ano_selecionado %}selected{% endif %}>
+                                            {{ ano }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-auto align-self-end">
+                            <button class="br-button primary" type="submit">Filtrar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Cards de Resumo -->
+            <div class="row">
+                <!-- Card de Totais -->
+                <div class="col-md-4">
+                    <div class="br-card">
+                        <div class="card-content">
+                            <h3 class="text-up-02">Resumo do Período</h3>
+                            <div class="br-list">
+                                <div class="br-item py-3">
+                                    <div class="row align-items-center">
+                                        <div class="col">Receitas</div>
+                                        <div class="col-auto text-success">R$ {{ total_receitas|floatformat:2 }}</div>
+                                    </div>
+                                </div>
+                                <div class="br-item py-3">
+                                    <div class="row align-items-center">
+                                        <div class="col">Despesas</div>
+                                        <div class="col-auto text-danger">R$ {{ total_despesas|floatformat:2 }}</div>
+                                    </div>
+                                </div>
+                                <div class="br-item py-3">
+                                    <div class="row align-items-center">
+                                        <div class="col"><strong>Saldo</strong></div>
+                                        <div class="col-auto {% if saldo >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                            <strong>R$ {{ saldo|floatformat:2 }}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card de Saldos -->
+                <div class="col-md-4">
+                    <div class="br-card">
+                        <div class="card-content">
+                            <h3 class="text-up-02">Saldos em Conta</h3>
+                            <form id="saldoForm">
+                                <div class="br-input mb-3">
+                                    <label for="saldo_bradesco">Saldo Bradesco</label>
+                                    <input id="saldo_bradesco" type="number" step="0.01" name="saldo_bradesco" value="{{ saldos_faturas.saldo_bradesco|default:0 }}">
+                                </div>
+                                <div class="br-input mb-3">
+                                    <label for="saldo_itau">Saldo Itaú</label>
+                                    <input id="saldo_itau" type="number" step="0.01" name="saldo_itau" value="{{ saldos_faturas.saldo_itau|default:0 }}">
+                                </div>
+                                <div class="br-input mb-3">
+                                    <label for="saldo_inter">Saldo Inter</label>
+                                    <input id="saldo_inter" type="number" step="0.01" name="saldo_inter" value="{{ saldos_faturas.saldo_inter|default:0 }}">
+                                </div>
+                                <div class="br-input mb-3">
+                                    <label for="saldo_total"><strong>Saldo Total</strong></label>
+                                    <input id="saldo_total" type="number" step="0.01" readonly>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card de Faturas -->
+                <div class="col-md-4">
+                    <div class="br-card">
+                        <div class="card-content">
+                            <h3 class="text-up-02">Faturas de Cartão</h3>
+                            <form id="faturaForm">
+                                <div class="br-input mb-3">
+                                    <label for="fatura_bradesco">Fatura Bradesco</label>
+                                    <input id="fatura_bradesco" type="number" step="0.01" name="fatura_bradesco" value="{{ saldos_faturas.fatura_bradesco|default:0 }}">
+                                </div>
+                                <div class="br-input mb-3">
+                                    <label for="fatura_itau">Fatura Itaú</label>
+                                    <input id="fatura_itau" type="number" step="0.01" name="fatura_itau" value="{{ saldos_faturas.fatura_itau|default:0 }}">
+                                </div>
+                                <div class="br-input mb-3">
+                                    <label for="fatura_inter">Fatura Inter</label>
+                                    <input id="fatura_inter" type="number" step="0.01" name="fatura_inter" value="{{ saldos_faturas.fatura_inter|default:0 }}">
+                                </div>
+                                <div class="br-input mb-3">
+                                    <label for="fatura_total"><strong>Total Faturas</strong></label>
+                                    <input id="fatura_total" type="number" step="0.01" readonly>
+                                </div>
+                            </form>
+                            <button class="br-button primary mt-3" type="button" onclick="salvarSaldosFaturas()">Salvar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Comparativo -->
+                <div class="col-12 mt-3">
+                    <div class="br-card">
+                        <div class="card-content">
+                            <h3 class="text-up-02">Comparativo de Saldos</h3>
+                            <div class="br-table">
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <td>Saldo Total das Contas</td>
+                                            <td id="comparativo_saldo_total">R$ 0,00</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Total das Faturas</td>
+                                            <td id="comparativo_fatura_total">R$ 0,00</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Saldo após Faturas</strong></td>
+                                            <td id="comparativo_saldo_apos_faturas">R$ 0,00</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card de Despesas por Categoria -->
+                <div class="col-12 mt-3">
+                    <div class="br-card">
+                        <div class="card-content">
+                            <h3 class="text-up-02">Despesas por Categoria</h3>
+                            {{ grid_content|safe }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const saldoForm = document.getElementById('saldoForm');
+        const faturaForm = document.getElementById('faturaForm');
+
+        function atualizarTotais() {
+            const saldos = ['bradesco', 'itau', 'inter'].map(banco => 
+                parseFloat(document.getElementById(`saldo_${banco}`).value) || 0
+            );
+            const saldoTotal = saldos.reduce((a, b) => a + b, 0);
+            
+            const faturas = ['bradesco', 'itau', 'inter'].map(banco => 
+                parseFloat(document.getElementById(`fatura_${banco}`).value) || 0
+            );
+            const faturaTotal = faturas.reduce((a, b) => a + b, 0);
+
+            document.getElementById('saldo_total').value = saldoTotal.toFixed(2);
+            document.getElementById('fatura_total').value = faturaTotal.toFixed(2);
+
+            document.getElementById('comparativo_saldo_total').textContent = `R$ ${saldoTotal.toFixed(2)}`;
+            document.getElementById('comparativo_fatura_total').textContent = `R$ ${faturaTotal.toFixed(2)}`;
+            const saldoAposFaturas = saldoTotal - faturaTotal;
+            document.getElementById('comparativo_saldo_apos_faturas').textContent = `R$ ${saldoAposFaturas.toFixed(2)}`;
+        }
+
+        saldoForm.addEventListener('input', atualizarTotais);
+        faturaForm.addEventListener('input', atualizarTotais);
+
+        atualizarTotais();
+    });
+
+    function salvarSaldosFaturas() {
+        const data = {
+            saldo_bradesco: document.getElementById('saldo_bradesco').value,
+            saldo_itau: document.getElementById('saldo_itau').value,
+            saldo_inter: document.getElementById('saldo_inter').value,
+            fatura_bradesco: document.getElementById('fatura_bradesco').value,
+            fatura_itau: document.getElementById('fatura_itau').value,
+            fatura_inter: document.getElementById('fatura_inter').value
+        };
+
+        fetch('/salvar-saldos-faturas/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const message = document.createElement('div');
+                message.className = 'br-message success';
+                message.innerHTML = `
+                    <div class="icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="content">${data.message}</div>
+                `;
+                document.querySelector('.container-lg').prepend(message);
+                setTimeout(() => message.remove(), 3000);
+            }
+        });
+    }
+</script>
+{% endblock %}

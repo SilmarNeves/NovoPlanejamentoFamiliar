@@ -1,0 +1,158 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block content %}
+<div class="br-page">
+    <div class="container-lg">
+        <!-- Filtros -->
+        <div class="br-card mb-3">
+            <div class="card-content">
+                <form method="get" id="filtroForm" class="br-form">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="br-select">
+                                <label for="carteira">Carteira:</label>
+                                <select id="carteira" name="carteira" class="br-input" onchange="document.getElementById('filtroForm').submit()">
+                                    {% for valor, nome in carteiras.items %}
+                                        <option value="{{ valor }}" {% if carteira_selecionada == valor %}selected{% endif %}>
+                                            {{ nome }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Cards -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="br-card hover">
+                    <div class="card-content">
+                        <div class="align-items-center">
+                            <h4 class="text-primary mb-1"><i class="fas fa-piggy-bank"></i> Total de Aportes</h4>
+                            <h3 class="mb-0">R$ {{ total_aportes|floatformat:2 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="br-card hover">
+                    <div class="card-content">
+                        <div class="align-items-center">
+                            <h4 class="text-success mb-1"><i class="fas fa-chart-line"></i> Patrimônio Atual</h4>
+                            <h3 class="mb-0">R$ {{ patrimonio_total|floatformat:2 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico -->
+        <div class="br-card mt-4">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="m-0">Evolução Patrimonial</h3>
+                    <div class="br-radio-group">
+                        <div class="br-radio">
+                            <input id="radio-tudo" name="periodo-grafico" type="radio" value="tudo" checked>
+                            <label for="radio-tudo">Tudo</label>
+                        </div>
+                        <div class="br-radio">
+                            <input id="radio-1ano" name="periodo-grafico" type="radio" value="1">
+                            <label for="radio-1ano">1 Ano</label>
+                        </div>
+                        <div class="br-radio">
+                            <input id="radio-6meses" name="periodo-grafico" type="radio" value="0.5">
+                            <label for="radio-6meses">6 Meses</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-content">
+                <div id="grafico-evolucao"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+var options = {
+    series: [{
+        name: 'Patrimônio',
+        data: {{ evolucao_mensal.valores|safe }}
+    }],
+    chart: {
+        height: 350,
+        type: 'area',
+        toolbar: {
+            show: true
+        }
+    },
+    dataLabels: {
+        enabled: false
+    },
+    stroke: {
+        curve: 'smooth'
+    },
+    xaxis: {
+        categories: {{ evolucao_mensal.periodos|safe }},
+        labels: {
+            rotate: -45
+        }
+    },
+    tooltip: {
+        y: {
+            formatter: function (val) {
+                return "R$ " + val.toFixed(2)
+            }
+        }
+    },
+    theme: {
+        palette: 'palette1'
+    }
+};
+
+var chart = new ApexCharts(document.querySelector("#grafico-evolucao"), options);
+chart.render();
+
+// Atualizar gráfico quando mudar o período
+document.querySelectorAll('input[name="periodo-grafico"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        let dados = filtrarDadosGrafico(this.value);
+        chart.updateOptions({
+            series: [{
+                name: 'Patrimônio',
+                data: dados.valores
+            }],
+            xaxis: {
+                categories: dados.periodos
+            }
+        });
+    });
+});
+
+function filtrarDadosGrafico(periodo) {
+    let dadosCompletos = {
+        valores: {{ evolucao_mensal.valores|safe }},
+        periodos: {{ evolucao_mensal.periodos|safe }}
+    };
+
+    if (periodo === 'tudo') {
+        return dadosCompletos;
+    }
+
+    let meses = periodo * 12;
+    return {
+        valores: dadosCompletos.valores.slice(-meses),
+        periodos: dadosCompletos.periodos.slice(-meses)
+    };
+}
+</script>
+{% endblock %}

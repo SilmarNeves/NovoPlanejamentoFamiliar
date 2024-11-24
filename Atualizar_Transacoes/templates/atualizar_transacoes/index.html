@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Atualizar Transações e Portfólios{% endblock %}
+
+{% block content %}
+<div class="container-lg">
+    <div class="br-card">
+        <div class="card-content">
+            <h2 class="br-h2">Atualizar Transações e Portfólios</h2>
+            
+            <div class="br-card hover">
+                <div class="card-content">
+                    <div class="card-content-title">
+                        <i class="fas fa-sync-alt" aria-hidden="true"></i>
+                        <h3 class="br-h3">Atualizar Sistema</h3>
+                    </div>
+                    <p>Atualiza as transações e gera os portfólios automaticamente.</p>
+                    <form action="{% url 'atualizar_sistema' %}" method="post">
+                        {% csrf_token %}
+                        <button class="br-button primary" type="submit">
+                            <i class="fas fa-sync-alt" aria-hidden="true"></i>
+                            <span>Atualizar Sistema</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Atualizar Cotações{% endblock %}
+
+{% block content %}
+<div class="template-base">
+    <main class="d-flex flex-fill justify-content-center align-items-center">
+        <div class="container-lg my-5">
+            <div class="br-card">
+                <div class="card-content">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-sync-alt text-primary mr-2"></i>
+                        Atualização de Cotações
+                    </h2>
+                                          <div class="br-message info" role="alert">
+                                              <div class="icon">
+                                                  <i class="fas fa-clock"></i>
+                                              </div>
+                                              <div class="content">
+                                                  Última atualização: {{ ultima_atualizacao|date:"d/m/Y H:i:s" }}
+                                              </div>
+                                          </div>
+                    <form method="POST" action="{% url 'atualizar_cotacao' %}" class="mt-4">
+                        {% csrf_token %}
+                        <div class="text-center">
+                            <button type="submit" class="br-button primary large">
+                                <i class="fas fa-sync mr-2"></i>
+                                Atualizar Cotações
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <a href="{% url 'atualizacao' %}" class="br-button secondary">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Voltar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

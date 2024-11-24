@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+
+{% load custom_filters %}
+{% load static %}
+
+{% block title %}Gráficos e Totais Gerais{% endblock %}
+
+{% block extra_head %}
+<link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+    .chart-container {
+        height: 300px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-lg">
+    <div class="br-card">
+        <div class="card-content">
+            <h2 class="br-h2">Totais Gerais</h2>
+            
+            <div class="br-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Total</th>
+                            <th>Variação Hoje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tipo, total in totais.items %}
+                            <tr>
+                                <td>{{ tipo }}</td>
+                                <td>{{ total|floatformat:2 }}</td>
+                                <td>
+                                    {% if tipo in variacoes %}
+                                        {% with variacao=variacoes|get_item:tipo %}
+                                            <span class="{% if variacao.percentual >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                                {{ variacao.percentual|floatformat:2 }}%
+                                                ({% if variacao.absoluta >= 0 %}+{% endif %}{{ variacao.absoluta|floatformat:2 }})
+                                            </span>
+                                        {% endwith %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="mt-4">
+                <h2 class="br-h2">Gráficos de Investimentos</h2>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="br-card">
+                            <div class="card-content">
+                                <h3 class="br-h3">Tipos de Ativos</h3>
+                                <div class="chart-container">
+                                    <canvas id="graficoTipos"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="br-card">
+                            <div class="card-content">
+                                <h3 class="br-h3">Ações</h3>
+                                <div class="chart-container">
+                                    <canvas id="graficoAcoes"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="br-card">
+                            <div class="card-content">
+                                <h3 class="br-h3">FIIs</h3>
+                                <div class="chart-container">
+                                    <canvas id="graficoFiis"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+window.onload = function() {
+    if (typeof Chart === 'undefined') {
+        console.log('Carregando Chart.js...');
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js';
+        script.onload = initCharts;
+        document.head.appendChild(script);
+    } else {
+        initCharts();
+    }
+};
+
+function generateRandomColors(count) {
+    const colors = [];
+    for (let i = 0; i < count; i++) {
+        const hue = (i * 137.508) % 360; // Distribuição uniforme de cores
+        const saturation = 70 + Math.random() * 10; // 70-80%
+        const lightness = 45 + Math.random() * 10; // 45-55%
+        
+        // Se o tom for próximo ao vermelho, substitui por rosa claro
+        if (hue >= 0 && hue <= 20 || hue >= 340 && hue <= 360) {
+            colors.push('hsl(340, 100%, 80%)'); // Rosa claro
+        } else {
+            colors.push(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
+        }
+    }
+    return colors;
+}
+
+function initCharts() {
+    // Gera cores para cada gráfico
+    const tiposColors = generateRandomColors({{ grafico_tipos_labels|length }});
+    const acoesColors = generateRandomColors({{ grafico_acoes_labels|length }});
+    const fiisColors = generateRandomColors({{ grafico_fiis_labels|length }});
+    
+    new Chart(document.getElementById('graficoTipos'), {
+        type: 'pie',
+        data: {
+            labels: {{ grafico_tipos_labels|safe }},
+            datasets: [{
+                data: {{ grafico_tipos_data|safe }},
+                backgroundColor: tiposColors
+            }]
+        },
+        options: { 
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+
+    new Chart(document.getElementById('graficoAcoes'), {
+        type: 'pie',
+        data: {
+            labels: {{ grafico_acoes_labels|safe }},
+            datasets: [{
+                data: {{ grafico_acoes_data|safe }},
+                backgroundColor: acoesColors
+            }]
+        },
+        options: { 
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+
+    new Chart(document.getElementById('graficoFiis'), {
+        type: 'pie',
+        data: {
+            labels: {{ grafico_fiis_labels|safe }},
+            datasets: [{
+                data: {{ grafico_fiis_data|safe }},
+                backgroundColor: fiisColors
+            }]
+        },
+        options: { 
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+}
+</script>
+{% endblock %}
+

@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-lg">
+    <div class="row">
+        <div class="col">
+            <!-- Cabeçalho da página -->
+            <div class="br-page-title">
+                <h1>Categorias</h1>
+            </div>
+
+            <!-- Botão Nova Categoria -->
+            <div class="mb-3">
+                <a href="{% url 'categoria_create' %}" class="br-button primary">
+                    <i class="fas fa-plus" aria-hidden="true"></i>
+                    Nova Categoria
+                </a>
+            </div>
+
+            <!-- Tabela de Categorias -->
+            <div class="br-table" data-search="data-search" data-selection="data-selection">
+                <div class="table-header">
+                    <div class="top-bar">
+                        <div class="table-title">Lista de Categorias</div>
+                        <div class="actions-trigger text-nowrap">
+                            <button class="br-button circle" type="button" data-toggle="dropdown" data-target="target01" aria-label="Acionar tabela">
+                                <i class="fas fa-ellipsis-v" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="search-bar">
+                        <div class="br-input">
+                            <label for="table-searchbox">Buscar</label>
+                            <input id="table-searchbox" type="text" placeholder="Buscar na tabela">
+                            <button class="br-button circle" type="button" aria-label="Buscar">
+                                <i class="fas fa-search" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Nome</th>
+                            <th scope="col">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for categoria in categorias %}
+                        <tr>
+                            <td>{{ categoria.nome }}</td>
+                            <td class="text-nowrap">
+                                <button class="br-button secondary circle small" type="button" data-toggle="modal" data-target="#modal-editar-{{ categoria.id }}">
+                                    <i class="fas fa-edit" aria-hidden="true"></i>
+                                </button>
+                                <button class="br-button danger circle small" type="button" data-toggle="modal" data-target="#modal-excluir-{{ categoria.id }}">
+                                    <i class="fas fa-trash-alt" aria-hidden="true"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Criação/Edição -->
+<div class="br-modal" id="modal-categoria">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Nova Categoria</h2>
+                <button class="br-button circle" type="button" data-dismiss="modal" aria-label="Fechar">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="br-input">
+                        <label for="nome">Nome da Categoria</label>
+                        <input id="nome" type="text" name="nome" required>
+                    </div>
+                    <div class="modal-footer justify-content-end">
+                        <button class="br-button secondary" type="button" data-dismiss="modal">Cancelar</button>
+                        <button class="br-button primary" type="submit">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Exclusão -->
+<div class="br-modal" id="modal-excluir">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Confirmar Exclusão</h2>
+                <button class="br-button circle" type="button" data-dismiss="modal" aria-label="Fechar">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir esta categoria?</p>
+                <div class="modal-footer justify-content-end">
+                    <button class="br-button secondary" type="button" data-dismiss="modal">Cancelar</button>
+                    <form method="post" action="" style="display: inline;">
+                        {% csrf_token %}
+                        <button class="br-button danger" type="submit">Confirmar Exclusão</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-lg">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="br-card">
+                <div class="card-header">
+                    <h2>{% if form.instance.id %}Editar{% else %}Nova{% endif %} Categoria</h2>
+                </div>
+                <div class="card-content">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="br-input">
+                            <label for="nome">Nome da Categoria</label>
+                            <input id="nome" type="text" name="nome" value="{{ form.instance.nome|default:'' }}" required>
+                        </div>
+                        <div class="mt-3">
+                            <button class="br-button primary" type="submit">Salvar</button>
+                            <a href="{% url 'categorias' %}" class="br-button secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

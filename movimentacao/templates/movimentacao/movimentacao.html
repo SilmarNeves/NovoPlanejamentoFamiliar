@@ -1,0 +1,324 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Controle Financeiro{% endblock %}
+
+{% block content %}
+<div class="br-page">
+    <div class="container-lg">
+        <!-- Breadcrumb -->
+        <div class="br-breadcrumb">
+            <ul class="crumb-list">
+                <li class="crumb home"><a href="/"><i class="fas fa-home"></i><span>Início</span></a></li>
+                <li class="crumb"><i class="fas fa-angle-right"></i><span>Controle Financeiro</span></li>
+            </ul>
+        </div>
+
+        <!-- Filtros -->
+        <div class="br-card mb-3">
+            <div class="card-content">
+                <form method="get" id="filtroForm" class="br-form">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="br-select">
+                                <label for="tabela">Carteira:</label>
+                                <select id="tabela" name="tabela" class="br-input" onchange="document.getElementById('filtroForm').submit()">
+                                    {% for valor, nome in tabelas_nomes.items %}
+                                        <option value="{{ valor }}" {% if tabela_selecionada == valor %}selected{% endif %}>
+                                            {{ nome }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="br-input">
+                                <label for="periodo">Período:</label>
+                                <input type="month" id="periodo" name="periodo" value="{{ periodo_selecionado }}" class="br-input" onchange="document.getElementById('filtroForm').submit()">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="br-button primary mt-3 mb-1 w-100">
+                                <i class="fas fa-filter"></i> Filtrar
+                            </button>
+                            <a href="{% url 'movimentacao' %}" class="br-button secondary w-100">
+                                <i class="fas fa-eraser"></i> Limpar Filtros
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Cards de Resumo -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="br-card hover">
+                    <div class="card-content">
+                        <div class="align-items-center">
+                            <h4 class="text-primary mb-1"><i class="fas fa-shopping-cart"></i> Compras</h4>
+                            <h3 class="mb-0">R$ {{ totais.total_compras|floatformat:2 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="br-card hover">
+                    <div class="card-content">
+                        <div class="align-items-center">
+                            <h4 class="text-success mb-1"><i class="fas fa-cash-register"></i> Vendas</h4>
+                            <h3 class="mb-0">R$ {{ totais.total_vendas|floatformat:2 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="br-card hover">
+                    <div class="card-content">
+                        <div class="align-items-center">
+                            <h4 class="text-info mb-1"><i class="fas fa-piggy-bank"></i> Aportes</h4>
+                            <h3 class="mb-0">R$ {{ totais.total_aportes|floatformat:2 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="br-card hover">
+                    <div class="card-content">
+                        <div class="align-items-center">
+                            <h4 class="text-primary mb-1"><i class="fas fa-calendar-alt"></i> Aporte Mês Atual</h4>
+                            <h3 class="mb-0">R$ {{ aportes_info.mes_atual|floatformat:2 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="br-card hover">
+                    <div class="card-content">
+                        <div class="align-items-center">
+                            <h4 class="text-success mb-1"><i class="fas fa-chart-line"></i> Últimos 6 Meses</h4>
+                            <h3 class="mb-0">R$ {{ aportes_info.ultimos_6_meses|floatformat:2 }}</h3>
+                            <h4 class="text-success mt-2">Média: R$ {{ aportes_info.media_6_meses|floatformat:2 }}/mês</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="br-card hover">
+                    <div class="card-content">
+                        <div class="align-items-center">
+                            <h4 class="text-info mb-1"><i class="fas fa-chart-bar"></i> Últimos 12 Meses</h4>
+                            <h3 class="mb-0">R$ {{ aportes_info.ultimos_12_meses|floatformat:2 }}</h3>
+                            <h4 class="text-info mt-2">Média: R$ {{ aportes_info.media_12_meses|floatformat:2 }}/mês</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    
+        <!-- Tabela de Movimentação em Acordeon -->
+        <div class="br-accordion" single="single">
+            <div class="item">
+                <button class="header" type="button" aria-controls="id1" aria-expanded="false">
+                    <span class="title">Movimentação Mensal ({{ movimentacao|length }})</span>
+                    <i class="fas fa-angle-down" aria-hidden="true"></i>
+                </button>
+                <div class="content" id="id1">
+                    <div class="br-card">
+                        <div class="card-content">
+                            <div class="d-flex justify-content-end mb-3">
+                                <button class="br-button secondary mr-2" onclick="exportarTabela('pdf')">
+                                    <i class="fas fa-file-pdf"></i> PDF
+                                </button>
+                                <button class="br-button secondary" onclick="exportarTabela('excel')">
+                                    <i class="fas fa-file-excel"></i> Excel
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table id="tabela-movimentacao" class="br-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Período</th>
+                                            <th>Compras</th>
+                                            <th>Vendas</th>
+                                            <th>Aportes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in movimentacao %}
+                                        <tr>
+                                            <td>{{ item.AnoMes }}</td>
+                                            <td>R$ {{ item.Total_de_Compras|floatformat:2 }}</td>
+                                            <td>R$ {{ item.Total_de_Vendas|floatformat:2 }}</td>
+                                            <td>R$ {{ item.Aportes|floatformat:2 }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico -->
+        <div class="br-card mt-4">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="m-0">Evolução Mensal</h3>
+                    <div class="br-radio-group">
+                        <div class="br-radio">
+                            <input id="radio-tudo" name="periodo-grafico" type="radio" value="tudo" checked>
+                            <label for="radio-tudo">Tudo</label>
+                        </div>
+                        <div class="br-radio">
+                            <input id="radio-1ano" name="periodo-grafico" type="radio" value="1">
+                            <label for="radio-1ano">1 Ano</label>
+                        </div>
+                        <div class="br-radio">
+                            <input id="radio-2anos" name="periodo-grafico" type="radio" value="2">
+                            <label for="radio-2anos">2 Anos</label>
+                        </div>
+                        <div class="br-radio">
+                            <input id="radio-3anos" name="periodo-grafico" type="radio" value="3">
+                            <label for="radio-3anos">3 Anos</label>
+                        </div>
+                        <div class="br-radio">
+                            <input id="radio-6meses" name="periodo-grafico" type="radio" value="0.5">
+                            <label for="radio-6meses">6 Meses</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-content">
+                <div id="grafico-evolucao"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const accordions = document.querySelectorAll('.br-accordion .header');
+    
+    accordions.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const content = this.nextElementSibling;
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            
+            // Toggle aria-expanded
+            this.setAttribute('aria-expanded', !isExpanded);
+            
+            // Toggle display
+            if (isExpanded) {
+                content.style.maxHeight = null;
+                content.style.display = 'none';
+            } else {
+                content.style.display = 'block';
+                content.style.maxHeight = content.scrollHeight + "px";
+            }
+            
+            // Rotate icon
+            const icon = this.querySelector('.fas.fa-angle-down');
+            icon.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
+        });
+    });
+});
+
+// Função para filtrar dados do gráfico
+function filtrarDadosGrafico(periodo) {
+    let dadosCompletos = {
+        compras: [{% for item in movimentacao_grafico %}{{ item.Total_de_Compras }},{% endfor %}],
+        vendas: [{% for item in movimentacao_grafico %}{{ item.Total_de_Vendas }},{% endfor %}],
+        aportes: [{% for item in movimentacao_grafico %}{{ item.Aportes }},{% endfor %}],
+        categorias: [{% for item in movimentacao_grafico %}'{{ item.AnoMes }}',{% endfor %}]
+    };
+
+    if (periodo === 'tudo') {
+        return dadosCompletos;
+    }
+
+    let meses = periodo * 12;
+    return {
+        compras: dadosCompletos.compras.slice(-meses),
+        vendas: dadosCompletos.vendas.slice(-meses),
+        aportes: dadosCompletos.aportes.slice(-meses),
+        categorias: dadosCompletos.categorias.slice(-meses)
+    };
+}
+
+var options = {
+    series: [{
+        name: 'Compras',
+        data: [{% for item in movimentacao_grafico %}{{ item.Total_de_Compras }},{% endfor %}]
+    }, {
+        name: 'Vendas',
+        data: [{% for item in movimentacao_grafico %}{{ item.Total_de_Vendas }},{% endfor %}]
+    }, {
+        name: 'Aportes',
+        data: [{% for item in movimentacao_grafico %}{{ item.Aportes }},{% endfor %}]
+    }],
+    chart: {
+        height: 350,
+        type: 'area',
+        toolbar: {
+            show: true
+        }
+    },
+    dataLabels: {
+        enabled: false
+    },
+    stroke: {
+        curve: 'smooth'
+    },
+    xaxis: {
+        categories: [{% for item in movimentacao_grafico %}'{{ item.AnoMes }}',{% endfor %}],
+        labels: {
+            rotate: -45
+        }
+    },
+    tooltip: {
+        y: {
+            formatter: function (val) {
+                return "R$ " + val.toFixed(2)
+            }
+        }
+    },
+    theme: {
+        palette: 'palette1'
+    }
+};
+
+var chart = new ApexCharts(document.querySelector("#grafico-evolucao"), options);
+chart.render();
+
+// Atualizar gráfico quando mudar o período
+document.querySelectorAll('input[name="periodo-grafico"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        let dados = filtrarDadosGrafico(this.value);
+        chart.updateOptions({
+            series: [{
+                name: 'Compras',
+                data: dados.compras
+            }, {
+                name: 'Vendas',
+                data: dados.vendas
+            }, {
+                name: 'Aportes',
+                data: dados.aportes
+            }],
+            xaxis: {
+                categories: dados.categorias
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

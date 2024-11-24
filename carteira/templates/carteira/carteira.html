@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Carteira de Investimentos{% endblock %}
+      {% block content %}
+      <div class="container-lg">
+          <div class="br-card">
+              <div class="card-content">
+                  <h2 class="br-h2">Carteira de Investimentos</h2>
+            
+                  {% if messages %}
+                      {% for message in messages %}
+                          <div class="br-message {{ message.tags }}" role="alert">
+                              <div class="icon">
+                                  <i class="fas {% if message.tags == 'success' %}fa-check{% else %}fa-info{% endif %}"></i>
+                              </div>
+                              <div class="content">
+                                  {{ message }}
+                              </div>
+                          </div>
+                      {% endfor %}
+                  {% endif %}
+
+                  <!-- Botão Atualizar Cotações -->
+                  <div class="text-right mb-3">
+                      <form method="POST" action="{% url 'atualizar_cotacao' %}" class="d-inline">
+                          {% csrf_token %}
+                          <input type="hidden" name="next" value="{{ request.path }}">
+                          <button type="submit" class="br-button primary">
+                              <i class="fas fa-sync-alt mr-2"></i>
+                              Atualizar Cotações
+                          </button>
+                      </form>
+                      
+                  </div>
+
+                  <!-- Resto do código existente -->
+              <div class="br-select">
+                  <label for="tabela">Selecione a Carteira:</label>
+                <select id="tabela" onchange="location = this.value;">
+                    {% for nome_exibicao, nome_tabela in tabelas_nomes.items %}
+                        <option value="?tabela={{ nome_exibicao }}" {% if tabela_selecionada == nome_exibicao %}selected{% endif %}>
+                            {{ nome_exibicao }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="br-accordion" single="single">
+                {% for tipo, grid_data in dados_por_tipo.items %}
+                    <div class="item">
+                        <button class="header" type="button" aria-controls="id{{ forloop.counter }}" aria-expanded="false">
+                            <span class="title">{{ tipo }} ({{ grid_data.table_data|length }})</span>
+                            <i class="fas fa-angle-down" aria-hidden="true"></i>
+                        </button>
+                        <div class="content" id="id{{ forloop.counter }}">
+                            {% include "components/ggrid.html" with title=grid_data.title columns=grid_data.columns table_data=grid_data.table_data %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Loaded');
+    const accordions = document.querySelectorAll('.br-accordion .header');
+    console.log('Found accordions:', accordions.length);
+    
+    accordions.forEach(button => {
+        button.addEventListener('click', function(e) {
+            console.log('Accordion clicked');
+            e.preventDefault();
+            const content = this.nextElementSibling;
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            
+            this.setAttribute('aria-expanded', !isExpanded);
+            content.style.display = isExpanded ? 'none' : 'block';
+            
+            const icon = this.querySelector('.fas.fa-angle-down');
+            icon.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
+        });
+    });
+}); 
+</script>
+{% endblock %}
+

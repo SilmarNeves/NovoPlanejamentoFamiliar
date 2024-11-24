@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atualizar Transações e Gerar Portfólios</title>
+</head>
+<body>
+    <h1>Atualizar Transações e Gerar Portfólios</h1>
+    <form action="{% url 'atualizar' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Atualizar Transações</button>
+    </form>
+    <br>
+    <form action="{% url 'gerar' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Gerar Portfólios</button>
+    </form>
+</body>
+</html>

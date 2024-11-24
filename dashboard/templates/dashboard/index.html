@@ -1,0 +1,93 @@
+
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}Dashboard - Controle Financeiro{% endblock %}
+
+{% block content %}
+<div class="br-page">
+    <div class="container-lg">
+        <!-- Navegação em Tabs -->
+        <div class="br-tab">
+            <nav class="tab-nav">
+                <ul>
+                    <li class="tab-item">
+                        <button type="button" data-panel="panel-1" aria-selected="true">
+                            <span class="name"><i class="fas fa-chart-pie"></i> Gráficos</span>
+                        </button>
+                    </li>
+                    <li class="tab-item">
+                        <button type="button" data-panel="panel-2">
+                            <span class="name"><i class="fas fa-wallet"></i> Carteira</span>
+                        </button>
+                    </li>
+                    <li class="tab-item">
+                        <button type="button" data-panel="panel-3">
+                            <span class="name"><i class="fas fa-exchange-alt"></i> Movimentação</span>
+                        </button>
+                    </li>
+                    <li class="tab-item">
+                        <button type="button" data-panel="panel-4">
+                            <span class="name"><i class="fas fa-piggy-bank"></i> Patrimônio</span>
+                        </button>
+                    </li>
+                    <li class="tab-item">
+                        <button type="button" data-panel="panel-5">
+                            <span class="name"><i class="fas fa-list"></i> Transações</span>
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="tab-content">
+                <!-- Painel de Gráficos -->
+                <div class="tab-panel active" id="panel-1">
+                    {% include "carteira/graficos.html" %}
+                </div>
+
+                <!-- Painel de Carteira -->
+                <div class="tab-panel" id="panel-2">
+                    {% include "carteira/carteira.html" %}
+                </div>
+
+                <!-- Painel de Movimentação -->
+                <div class="tab-panel" id="panel-3">
+                    {% include "movimentacao/movimentacao.html" %}
+                </div>
+
+                <!-- Painel de Patrimônio -->
+                <div class="tab-panel" id="panel-4">
+                    {% include "patrimonio/patrimonio.html" %}
+                </div>
+
+                <!-- Painel de Transações -->
+                <div class="tab-panel" id="panel-5">
+                    {% include "transacoes/transacoes.html" %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('.tab-item button');
+    const panels = document.querySelectorAll('.tab-panel');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            // Remove seleção atual
+            tabs.forEach(t => t.setAttribute('aria-selected', 'false'));
+            panels.forEach(p => p.classList.remove('active'));
+
+            // Ativa nova seleção
+            tab.setAttribute('aria-selected', 'true');
+            const panelId = tab.getAttribute('data-panel');
+            document.getElementById(panelId).classList.add('active');
+        });
+    });
+});
+</script>
+{% endblock %}

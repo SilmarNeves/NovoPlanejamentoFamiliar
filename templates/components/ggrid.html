@@ -1,0 +1,185 @@
+{% load static %}
+
+<div class="br-table" data-search="data-search" data-sort="data-sort" data-pagination="data-pagination" data-per-page="30">
+    <div class="table-header">
+        <div class="top-bar">
+            <div class="table-title">{{ title }}</div>
+            <div class="search-trigger" style="cursor: pointer;">
+                <div class="br-input" onclick="document.querySelector('.search-bar').classList.add('is-active')">
+                    <label for="table-searchbox">Buscar</label>
+                    <input id="table-searchbox" type="text" placeholder="Buscar na tabela" onkeyup="window.GGrid.filterTable('table-searchbox')"/>
+                    <button class="br-button" type="button" aria-label="Buscar">
+                        <i class="fas fa-search" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="search-bar">
+            <div class="br-input">
+                <label for="table-searchbox">Buscar</label>
+                <input id="table-searchbox" type="text" placeholder="Buscar na tabela" onkeyup="window.GGrid.filterTable()"/>
+                <button class="br-button" type="button" aria-label="Buscar">
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                </button>
+            </div>
+            <button class="br-button circle" type="button" data-dismiss="search" aria-label="Fechar busca">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+        </div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                {% for column in columns %}
+                    <th>
+                        <div class="th-content">
+                            {{ column }}
+                            <button class="br-button" type="button" onclick="window.GGrid.sortTable({{ forloop.counter0 }})">
+                                <i class="fas fa-sort" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in table_data %}
+                <tr>
+                    {% for cell in row %}
+                        <td>{{ cell|safe }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="table-footer">
+        <div class="br-pagination">
+            <div class="pagination-per-page">
+                <div class="br-select">
+                    <label for="per-page-select">Itens por página:</label>
+                    <select id="per-page-select" onchange="window.GGrid.changePerPage(this.value)">
+                        <option value="10">10</option>
+                        <option value="30" selected>30</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+            </div>
+            <div class="pagination-pages" id="pagination-controls"></div>
+        </div>
+    </div>
+
+    <script>
+    if (typeof window.GGrid === 'undefined') {
+        window.GGrid = {
+            currentPage: 1,
+            itemsPerPage: 30,
+    
+            changePerPage: function(value) {
+                this.itemsPerPage = parseInt(value);
+                this.currentPage = 1;
+                this.showPage(1);
+                this.updatePagination();
+            },
+    
+            showPage: function(page) {
+                const table = document.querySelector('.br-table tbody');
+                const rows = table.getElementsByTagName('tr');
+                const start = (page - 1) * this.itemsPerPage;
+                const end = start + this.itemsPerPage;
+        
+                for (let i = 0; i < rows.length; i++) {
+                    rows[i].style.display = (i >= start && i < end) ? '' : 'none';
+                }
+            },
+    
+            updatePagination: function() {
+                const table = document.querySelector('.br-table tbody');
+                const totalRows = table.getElementsByTagName('tr').length;
+                const totalPages = Math.ceil(totalRows / this.itemsPerPage);
+        
+                const controls = document.getElementById('pagination-controls');
+                controls.innerHTML = '';
+        
+                for (let i = 1; i <= totalPages; i++) {
+                    const button = document.createElement('button');
+                    button.className = 'br-button';
+                    button.textContent = i;
+                    button.onclick = () => {
+                        this.currentPage = i;
+                        this.showPage(i);
+                    };
+                    controls.appendChild(button);
+                }
+            },
+
+            init: function() {
+                this.showPage(1);
+                this.updatePagination();
+            },
+
+            filterTable: function(inputId) {
+                const input = document.getElementById(inputId);
+                const filter = input.value.toUpperCase();
+                const table = document.querySelector(".br-table table");
+                const tr = table.getElementsByTagName("tr");
+
+                for (let i = 1; i < tr.length; i++) {
+                    const td = tr[i].getElementsByTagName("td");
+                    let txtValue = "";
+                    let display = false;
+                    
+                    for (let j = 0; j < td.length; j++) {
+                        txtValue = td[j].textContent || td[j].innerText;
+                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                            display = true;
+                            break;
+                        }
+                    }
+                    tr[i].style.display = display ? "" : "none";
+                }
+            },
+
+            sortTable: function(n) {
+                const table = document.querySelector(".br-table table");
+                const tbody = table.querySelector('tbody');
+                const rows = Array.from(tbody.rows);
+                const dir = this.currentDir = !this.currentDir;
+
+                // Função para extrair valor numérico de strings formatadas
+                const getValue = (text) => {
+                    // Remove R$, %, e converte para número
+                    return parseFloat(text.replace(/[R$\s%]/g, '').replace(',', '.')) || 0;
+                };
+
+                rows.sort((a, b) => {
+                    let aText = a.cells[n].textContent.trim();
+                    let bText = b.cells[n].textContent.trim();
+                    
+                    // Se contém R$ ou %, trata como número
+                    if (aText.includes('R$') || aText.includes('%')) {
+                        const aValue = getValue(aText);
+                        const bValue = getValue(bText);
+                        return dir ? aValue - bValue : bValue - aValue;
+                    }
+                    
+                    // Tenta converter para número se possível
+                    const aNum = parseFloat(aText);
+                    const bNum = parseFloat(bText);
+                    if (!isNaN(aNum) && !isNaN(bNum)) {
+                        return dir ? aNum - bNum : bNum - aNum;
+                    }
+                    
+                    // Caso contrário, ordena como texto
+                    return dir ? 
+                        aText.localeCompare(bText) : 
+                        bText.localeCompare(aText);
+                });
+
+                tbody.append(...rows);
+            }        };
+
+        document.addEventListener('DOMContentLoaded', () => window.GGrid.init());
+    }
+    </script>

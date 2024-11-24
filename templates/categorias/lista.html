@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-lg">
+    <div class="row">
+        <div class="col">
+            <div class="br-page-title">
+                <h1>Categorias</h1>
+            </div>
+            <div class="mb-3">
+                <a href="{% url 'categoria_create' %}" class="br-button primary">
+                    <i class="fas fa-plus" aria-hidden="true"></i>
+                    Nova Categoria
+                </a>
+            </div>
+    {{ grid_content|safe }}
+        </div>
+    </div>
+</div>
+{% endblock %}
