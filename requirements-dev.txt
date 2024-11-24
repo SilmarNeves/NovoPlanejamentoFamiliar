@@ -1,0 +1,8 @@
+wrangler
+python-dotenv
+django-debug-toolbar
+pytest
+pytest-django
+coverage
+black
+flake8
