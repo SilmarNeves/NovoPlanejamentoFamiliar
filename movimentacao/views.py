@@ -2,7 +2,9 @@ from django.shortcuts import render
 from django.db import connection
 from django.contrib.auth.decorators import login_required
 import pandas as pd
+from django.contrib.auth.decorators import login_required
 
+@login_required
 def get_movimentacao_context(request):
     tabelas_nomes = {
         'transacoes_consolidadas': 'Consolidada',

@@ -120,21 +120,21 @@
                       <span class="br-divider vertical mx-half mx-sm-1"></span>
                         <!-- Investimentos -->
                         <div class="col-auto">
-                            <a class="br-item" href="http://127.0.0.1:8000/carteira/">
+                            <a class="br-item" href="{% url 'carteira:carteira' %}">
                                 <i class="fas fa-chart-line text-success" aria-hidden="true"></i>
                                 <span>Carteira</span>
                             </a>
                         </div>
                         <div class="col-auto">
-                            <a class="br-item" href="http://127.0.0.1:8000/carteira/graficos/">
+                            <a class="br-item" href="{% url 'carteira:carteira_graficos' %}">
                                 <i class="fas fa-chart-pie text-primary" aria-hidden="true"></i>
                                 <span>Gráficos</span>
                             </a>
                         </div>
                         <div class="col-auto">
-                            <a class="br-item" href="http://127.0.0.1:8000/patrimonio/">
-                                <i class="fas fa-piggy-bank text-warning" aria-hidden="true"></i>
-                                <span>Patrimônio</span>
+                            <a class="menu-item" href="{% url 'patrimonio:patrimonio' %}">
+                                <span class="icon"><i class="fas fa-chart-line" aria-hidden="true"></i></span>
+                                <span class="content">Patrimônio</span>
                             </a>
                         </div>
                         <div class="col-auto">
@@ -147,14 +147,15 @@
                   </div>
 
                   <span class="br-divider vertical mx-half mx-sm-1"></span>
-                  
-                  <div class="col-auto">
-                      <a class="br-item" href="{% url 'logout' %}">
-                          <i class="fas fa-sign-out-alt text-danger" aria-hidden="true"></i>
-                          <span>Sair</span>
-                      </a>
-                  </div>
-
+                                      <div class="col-auto">
+                                        <form method="post" action="{% url 'autenticacao:logout' %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="br-item">
+                                                <i class="fas fa-sign-out-alt text-danger" aria-hidden="true"></i>
+                                                <span>Sair</span>
+                                            </button>
+                                        </form>                                    
+                    </div>
                   <span class="br-divider vertical mx-half mx-sm-1"></span>
                   
                   <button class="br-button" type="button" aria-label="Alterar contraste" onclick="toggleContrast()">
@@ -191,7 +192,7 @@
                         </a>
                     </li>
                     <li>
-                        <a class="menu-item" href="http://127.0.0.1:8000/financeiro/transacoes/">
+                        <a class="menu-item" href="{% url 'transacoes' %}">
                             <span class="icon"><i class="fas fa-exchange-alt text-success" aria-hidden="true"></i></span>
                             <span class="content">Transações</span>
                         </a>
@@ -213,25 +214,25 @@
                     </a>
                     <ul>
                         <li>
-                            <a class="menu-item" href="http://127.0.0.1:8000/index/">
+                            <a class="menu-item" href="{% url 'index' %}">
                                 <span class="icon"><i class="fas fa-home" aria-hidden="true"></i></span>
                                 <span class="content">Início</span>
                             </a>
                         </li>
                         <li>
-                            <a class="menu-item" href="http://127.0.0.1:8000/carteira/">
+                            <a class="menu-item" href="{% url 'carteira:carteira' %}">
                                 <span class="icon"><i class="fas fa-chart-line" aria-hidden="true"></i></span>
                                 <span class="content">Carteira</span>
                             </a>
                         </li>
                         <li>
-                            <a class="menu-item" href="http://127.0.0.1:8000/patrimonio/">
+                            <a class="menu-item" href="{% url 'patrimonio:patrimonio' %}">
                                 <span class="icon"><i class="fas fa-chart-line" aria-hidden="true"></i></span>
                                 <span class="content">Patrimônio</span>
                             </a>
                         </li>
                         <li>
-                            <a class="menu-item" href="http://127.0.0.1:8000/movimentacao/">
+                            <a class="menu-item" href="{% url 'movimentacao' %}">
                                 <span class="icon"><i class="fas fa-exchange-alt" aria-hidden="true"></i></span>
                                 <span class="content">Movimentação</span>
                             </a>
@@ -241,12 +242,14 @@
                                 <span class="icon"><i class="fas fa-percentage" aria-hidden="true"></i></span>
                                 <span class="content">Rentabilidade</span>
                             </a>
+                            
                         </li>
                         <li>
                             <a class="menu-item" href="#">
                                 <span class="icon"><i class="fas fa-chart-pie" aria-hidden="true"></i></span>
                                 <span class="content">Composição</span>
                             </a>
+                            
                         </li>
                         <li>
                             <a class="menu-item" href="#">
@@ -287,10 +290,12 @@
                     </a>
                     <ul>
                         <li>
-                            <a class="menu-item" href="http://127.0.0.1:8000/cotacoes/">
+                            <a class="menu-item" href="{% url 'atualizar_cotacao' %}">
                                 <span class="icon"><i class="fas fa-sync" aria-hidden="true"></i></span>
                                 <span class="content">Atualizar</span>
                             </a>
+                            
+                            
                         </li>
                     </ul>
                 </div>

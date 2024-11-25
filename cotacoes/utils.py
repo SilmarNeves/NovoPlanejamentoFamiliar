@@ -8,29 +8,30 @@ from django.core.cache import cache
 import logging
 
 logger = logging.getLogger(__name__)
-
 def get_ultimo_dia_util():
-    hoje = datetime.today().date()
+        hoje = datetime.now()
     
-    # Se for domingo, pega sexta (22/11)
-    if hoje.weekday() == 6:
-        return hoje - timedelta(days=2)
-    # Se for sábado, pega sexta
-    elif hoje.weekday() == 5:
-        return hoje - timedelta(days=1)
-    # Se for segunda, pega sexta
-    elif hoje.weekday() == 0:
-        return hoje - timedelta(days=3)
-    # Outros dias, pega o dia anterior
-    else:
-        return hoje - timedelta(days=1)
-
-def get_dia_util_anterior():
-    ultimo_dia_util = get_ultimo_dia_util()
+        # Se for após 18h, considera o dia atual
+        # Se for antes das 18h, considera o dia anterior
+        if hoje.hour < 18:
+            hoje = hoje - timedelta(days=1)
     
-    # Sempre pega o dia útil anterior ao último
-    return ultimo_dia_util - timedelta(days=1)
+        hoje = hoje.date()
+    
+        # Ajusta para o último dia útil
+        while hoje.weekday() in [5, 6]:  # 5=sábado, 6=domingo
+            hoje = hoje - timedelta(days=1)
+        
+        return hoje
 
+def get_dia_util_anterior(ultimo_dia_util):
+        dia = ultimo_dia_util - timedelta(days=1)
+    
+        # Ajusta para o dia útil anterior
+        while dia.weekday() in [5, 6]:  # 5=sábado, 6=domingo
+            dia = dia - timedelta(days=1)
+        
+        return dia
 def obter_preco(ativo, data=None):
     try:
         ticker_symbol = f"{ativo}.SA"
@@ -59,13 +60,12 @@ def buscar_precos(ativos):
     ativos_precos = {}
     ativos_precos_anteriores = {}
     ultimo_dia_util = get_ultimo_dia_util()
-    dia_util_anterior = get_dia_util_anterior()
+    dia_util_anterior = get_dia_util_anterior(ultimo_dia_util)
 
     logger.info(f"""
-    Iniciando busca de preços:
-    - Último dia útil: {ultimo_dia_util}
-    - Dia útil anterior: {dia_util_anterior}
-    - Ativos a consultar: {ativos}
+    Buscando cotações:
+    Último dia útil: {ultimo_dia_util} ({ultimo_dia_util.strftime('%A')})
+    Dia útil anterior: {dia_util_anterior} ({dia_util_anterior.strftime('%A')})
     """)
 
     def obter_precos(ativo):

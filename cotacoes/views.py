@@ -7,7 +7,10 @@ from .utils import atualizar_cotacao_otimizado
 from django.contrib import messages
 from django.utils import timezone
 import pytz
+from django.contrib.auth.decorators import login_required
 
+
+@login_required
 def atualizar_cotacao_view(request):
     if request.method == 'POST':
         atualizar_cotacao_otimizado()
@@ -21,6 +24,7 @@ def atualizar_cotacao_view(request):
     return render(request, 'carteira/carteira.html', {'ultima_atualizacao': ultima_atualizacao})
 
 # transacoes/views.py
+@login_required
 def atualizar_tudo(request):
     session = HTMLSession()
     

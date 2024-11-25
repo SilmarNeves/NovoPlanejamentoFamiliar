@@ -1,7 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.views import LoginView, PasswordResetView
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, TemplateView
-from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.template.loader import render_to_string
 from django.http import JsonResponse
@@ -12,20 +11,14 @@ from calendar import month_name
 from datetime import datetime
 from .models import Categoria, Transacao, SaldosFaturas
 from django.urls import reverse_lazy, reverse
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+from django.contrib.auth.views import LoginView
+from django.urls import reverse_lazy
 
-
+@login_required
 def index(request):
     return render(request, 'base.html')
-
-class LoginUsuarioView(LoginView):
-    template_name = 'login.html'
-    redirect_authenticated_user = True
-    success_url = reverse_lazy('transacoes')
-
-class RecuperarSenhaView(PasswordResetView):
-    template_name = 'recuperar_senha.html'
-    email_template_name = 'email/recuperar_senha_email.html'
-    success_url = reverse_lazy('password_reset_done')
 
 class ResumoView(LoginRequiredMixin, TemplateView):
     template_name = 'resumo/resumo.html'
@@ -155,6 +148,7 @@ class TransacaoCreateView(LoginRequiredMixin, CreateView):
     template_name = 'transacoes/form.html'
     success_url = reverse_lazy('transacoes')
 
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['categorias'] = Categoria.objects.all()

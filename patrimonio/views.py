@@ -3,6 +3,7 @@ from django.db import connection
 import pandas as pd
 from django.contrib.auth.decorators import login_required
 
+@login_required
 def get_patrimonio_context(request):
     carteiras = {
         'transacoes_consolidadas': 'Consolidada',

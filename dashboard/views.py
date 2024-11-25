@@ -3,7 +3,9 @@ from carteira.views import get_carteira_context
 from patrimonio.views import get_patrimonio_context
 from movimentacao.views import get_movimentacao_context
 from transacoes.views import get_transacoes_context
+from django.contrib.auth.decorators import login_required
 
+@login_required
 def index(request):
       context = {
           **get_carteira_context(request),

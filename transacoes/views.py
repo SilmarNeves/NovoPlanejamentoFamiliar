@@ -1,8 +1,10 @@
 from django.shortcuts import render
 from django.db import connection
 import pandas as pd
+from django.contrib.auth.decorators import login_required
 
 
+@login_required
 def get_transacoes_context(request):
     tabelas_nomes = {
 
@@ -50,6 +52,7 @@ def get_transacoes_context(request):
 
 
 
+@login_required
 def transacoes_view(request):
     context = get_transacoes_context(request)
     return render(request, 'transacoes/transacoes.html', context)

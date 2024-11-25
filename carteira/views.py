@@ -1,10 +1,12 @@
 
+
 from django.shortcuts import render
 from django.db import connection
 from collections import defaultdict
 from django.contrib.auth.decorators import login_required
 import pandas as pd
 
+@login_required
 def get_carteira_context(request):
     tabelas_nomes = {
         'transacoes_consolidadas': 'Consolidada',
@@ -75,18 +77,21 @@ def get_carteira_context(request):
                     total_variacao_ponderada_fii += (variacao_hoje * patrimonio_atual)
                     ativos_fiis[ativo[0]] = patrimonio_atual
                 
+                # Na função get_carteira_context()
                 row = [
-                    ativo[0],  # Nome
-                    f"{ativo[2]:.0f}",  # Quantidade
-                    f"R$ {ativo[3]:.2f}",  # Preço Médio
-                    f"R$ {ativo[4]:.2f}",  # Preço Atual
-                    f'<span class="{"text-success" if ativo[5] > 0 else "text-danger"}">{ativo[5]:.2f}%</span>',
-                    f'<span class="{"text-success" if ativo[6] > 0 else "text-danger"}">R$ {ativo[6]:.2f}</span>',
-                    f'<span class="{"text-success" if ativo[7] > 0 else "text-danger"}">{ativo[7]:.2f}%</span>',
-                    f"R$ {patrimonio_atual:.2f}",
-                    f"{ativo[9]:.2f}%",
-                    f"{ativo[10]:.2f}%"
-                ]
+    ativo[0],  # Nome
+    f"{float(ativo[2] or 0):.0f}",  # Quantidade
+    f"R$ {float(ativo[3] or 0):.2f}",  # Preço Médio
+    f"R$ {float(ativo[4] or 0):.2f}",  # Preço Atual
+    f'<span class="{"text-success" if float(ativo[5] or 0) > 0 else "text-danger"}">{float(ativo[5] or 0):.2f}%</span>',
+    f'<span class="{"text-success" if float(ativo[6] or 0) > 0 else "text-danger"}">R$ {float(ativo[6] or 0):.2f}</span>',
+    f'<span class="{"text-success" if float(ativo[7] or 0) > 0 else "text-danger"}">{float(ativo[7] or 0):.2f}%</span>',
+    f"R$ {float(patrimonio_atual or 0):.2f}",
+    f"{float(ativo[9] or 0):.2f}%",
+    f"{float(ativo[10] or 0):.2f}%"
+]
+
+
                 table_data.append(row)
                 totais[tipo] += patrimonio_atual
 
